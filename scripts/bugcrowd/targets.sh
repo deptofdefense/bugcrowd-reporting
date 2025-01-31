@@ -2,16 +2,16 @@
 set -euo pipefail
 
 HOST="https://api.bugcrowd.com"
-ENDPOINT="/submissions"
+ENDPOINT="/targets"
 PAGE=1
 NEXT=""
 DATA_DIR="data${ENDPOINT}"
-TARGETS="${1:?'Set targets with comma delimiter: target1.com,target2.com'}"
 
 mkdir -p "$DATA_DIR"
 if [ "$(ls -A $DATA_DIR)" ]; then
     shred -u $DATA_DIR/*.json
 fi
+
 # Encode "," only
 function urlencode() {
     sed -e 's/,/%2c/g' <<<"$1"
@@ -29,10 +29,6 @@ while true; do
     else
         RESP=$(curl -s --get \
             --url "${HOST}${ENDPOINT}" \
-            --data-urlencode 'fields[target]=name,category,organization' \
-            --data-urlencode 'filter[state]=unresolved,resolved,informational' \
-            --data-urlencode "filter[target]=$TARGETS" \
-            --data-urlencode 'sort=severity-asc,submitted-asc' \
             --data-urlencode 'page[limit]=25' \
             -H "Accept: application/vnd.bugcrowd+json" \
             -H "Authorization: Token $BUGCROWD_USERNAME:$BUGCROWD_PASSWORD" \
