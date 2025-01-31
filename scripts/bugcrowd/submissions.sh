@@ -5,8 +5,9 @@ HOST="https://api.bugcrowd.com"
 ENDPOINT="/submissions"
 PAGE=1
 NEXT=""
+DATA_DIR="data${ENDPOINT}"
 
-mkdir -p "data${ENDPOINT}"
+mkdir -p "$DATA_DIR"
 
 # Encode "," only
 function urlencode() {
@@ -40,6 +41,8 @@ while true; do
 
     NEXT=$(jq -r '.links.next' <<<"$RESP" | sed "s/\\${ENDPOINT}?//")
     NEXT=$(urlencode "$NEXT")
-    jq . <<<"$RESP" >"data${ENDPOINT}/$(printf "%03d\n" $PAGE).json"
+    jq . <<<"$RESP" >"$DATA_DIR/$(printf "%03d\n" $PAGE).json"
     PAGE=$((PAGE + 1))
 done
+
+jq -s '[.[].data] | flatten' $DATA_DIR/*.json >$DATA_DIR/all.json
