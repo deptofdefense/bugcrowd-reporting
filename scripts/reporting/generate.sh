@@ -5,8 +5,22 @@ export DATA_DIR="data/submissions"
 export REPORT_FILE="output/report.md"
 export IMAGE_DIR="output/images"
 
-echo "Fetching all submissions"
-./scripts/bugcrowd/submissions.sh "$1"
+if [[ ! -f data/targets/all.json ]]; then
+    echo "Fetching targets"
+    ./scripts/bugcrowd/targets.sh
+    echo "Done fetching targets"
+fi
+
+TARGETS=$(
+    jq -r .[].attributes.name data/targets/all.json |
+        sort |
+        fzf --multi --prompt='Select targets' |
+        tr '\n' ',' |
+        sed 's/,$//'
+)
+
+echo "Fetching submissions for $TARGETS"
+./scripts/bugcrowd/submissions.sh "$TARGETS"
 echo "Done fetching submissions"
 
 echo "Generating initial report"

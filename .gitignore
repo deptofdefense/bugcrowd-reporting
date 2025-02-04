@@ -1,6 +1,5 @@
 .direnv
 .venv
 data/**/*.json
-output/**/*.png
-output/**/*.jpeg
+output/images/*
 output/*.md

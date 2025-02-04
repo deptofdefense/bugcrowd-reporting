@@ -23,7 +23,8 @@ IMAGES_B64=$(
 function escape() {
     sed \
         -e 's|/|\\/|g' \
-        -e 's|\.|\\.|g'
+        -e 's|\.|\\.|g' \
+        -e 's| $||g'
 }
 
 function image_ext() {
@@ -40,7 +41,7 @@ function fetch_image() {
         -o "output/images/$ID.$FILE_TYPE"
 }
 
-# export -f fetch_image
+# export -f fetch_image image_ext
 # parallel fetch_image ::: $IMAGES_B64
 
 IMAGE_BASE_DIR=$(basename "$IMAGE_DIR")
@@ -49,9 +50,10 @@ grep -o -E "https://bugcrowd\.com/.*/attachments/.* " "$REPORT_FILE" | while IFS
     ID="${ID%"${ID##*[![:space:]]}"}"
     ESCAPED_URL=$(escape <<<"$url")
     FILE_TYPE=$(jq -r --arg id $ID '.[$id]?.file_type?' <<<"$IMAGES" | image_ext)
+
     if [[ $FILE_TYPE == "null" ]]; then
         sed -i '' "s|$ESCAPED_URL||g" "$REPORT_FILE"
     else
-        sed -i '' "s|$ESCAPED_URL|${IMAGE_BASE_DIR}/${ID}\.${FILE_TYPE} |g" "$REPORT_FILE"
+        sed -i '' "s|$ESCAPED_URL|${IMAGE_BASE_DIR}\/${ID}\.${FILE_TYPE} |g" "$REPORT_FILE"
     fi
 done

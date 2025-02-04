@@ -14,7 +14,7 @@
 
 ```bash
 TARGETS='*.dds.mil,other.target.com'
-op run --env-file=".env" -- ./scripts/bugcrowd/submissions.sh $TARGETS
+op run --env-file=".env" -- ./scripts/reporting/generate.sh $TARGETS
 ```
 
 ### Generating Report
