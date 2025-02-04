@@ -8,9 +8,7 @@ NEXT=""
 DATA_DIR="data${ENDPOINT}"
 
 mkdir -p "$DATA_DIR"
-if [ "$(ls -A $DATA_DIR)" ]; then
-    shred -u $DATA_DIR/*.json
-fi
+rm -f $DATA_DIR/*.json
 
 # Encode "," only
 function urlencode() {
@@ -21,13 +19,13 @@ while true; do
     echo "Fetching page $PAGE"
     if [[ -n $NEXT ]]; then
         # --globoff needed to ignore "[]" in query params
-        RESP=$(curl -s --get --globoff \
+        RESP=$(curl -s --get --globoff --fail \
             --url "${HOST}${ENDPOINT}?${NEXT}" \
             -H "Accept: application/vnd.bugcrowd+json" \
             -H "Authorization: Token $BUGCROWD_USERNAME:$BUGCROWD_PASSWORD" \
             -H 'Bugcrowd-Version: 2024-08-15')
     else
-        RESP=$(curl -s --get \
+        RESP=$(curl -s --get --fail \
             --url "${HOST}${ENDPOINT}" \
             --data-urlencode 'page[limit]=25' \
             -H "Accept: application/vnd.bugcrowd+json" \
