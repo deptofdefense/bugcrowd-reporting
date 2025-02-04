@@ -5,7 +5,6 @@ HOST="https://api.bugcrowd.com"
 ENDPOINT="/submissions"
 PAGE=1
 NEXT=""
-DATA_DIR="data${ENDPOINT}"
 TARGETS="${1:?'Set targets with comma delimiter: target1.com,target2.com'}"
 
 mkdir -p "$DATA_DIR"
@@ -30,6 +29,9 @@ while true; do
         RESP=$(curl -s --get \
             --url "${HOST}${ENDPOINT}" \
             --data-urlencode 'fields[target]=name,category,organization' \
+            --data-urlencode 'fields[submission]=title,description,state,target,bug_url,severity,file_attachments' \
+            --data-urlencode 'fields[file_attachment]=file_name,file_type,s3_signed_url,parent' \
+            --data-urlencode 'include=file_attachments' \
             --data-urlencode 'filter[state]=unresolved,resolved,informational' \
             --data-urlencode "filter[target]=$TARGETS" \
             --data-urlencode 'sort=severity-asc,submitted-asc' \

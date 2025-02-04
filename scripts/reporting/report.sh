@@ -1,6 +1,5 @@
 #! /usr/bin/env bash
 set -euo pipefail
-REPORT_FILE="report.md"
 
 SUBMISSIONS_BY_STATE=$(jq '
     group_by(.attributes.state) |
@@ -46,6 +45,7 @@ for STATE in "${STATE_TYPES[@]}"; do
 
     while IFS= read -r line; do
         ITEM=$(base64 -d <<<"$line")
+        ID=$(jq -r '.id' <<<"$ITEM")
         TITLE=$(jq -r '.attributes.title' <<<"$ITEM")
         SEVERITY=$(jq -r '.attributes.severity' <<<"$ITEM")
         BUG_URL=$(jq -r '.attributes.bug_url' <<<"$ITEM")
@@ -55,6 +55,10 @@ for STATE in "${STATE_TYPES[@]}"; do
 
         echo "### P${SEVERITY} - $(sanitize <<<${TITLE^})" >>$REPORT_FILE
         echo >>$REPORT_FILE
+
+        echo "ID: **${ID}**" >>$REPORT_FILE
+        echo >>$REPORT_FILE
+
         if [[ -n $BUG_URL ]]; then
             echo "Affected URL: [$BUG_URL](${BUG_URL})" >>$REPORT_FILE
             echo >>$REPORT_FILE
