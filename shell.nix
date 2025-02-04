@@ -1,4 +1,6 @@
-{ pkgs ? import <nixpkgs> {} }:
+{
+  pkgs ? import <nixpkgs> { },
+}:
 with pkgs;
 mkShell {
   buildInputs = [
@@ -14,11 +16,10 @@ mkShell {
   '';
 
   packages = [
-    (python312.withPackages
-      (
-        pythonPackages: [
-          
-        ]
-      ))
+    fzf
+    jq
+    (python312.withPackages (pythonPackages: [
+
+    ]))
   ];
 }
