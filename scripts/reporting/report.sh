@@ -56,11 +56,11 @@ for STATE in "${STATE_TYPES[@]}"; do
         echo "### P${SEVERITY} - $(sanitize <<<${TITLE^})" >>$REPORT_FILE
         echo >>$REPORT_FILE
 
-        echo "ID: **${ID}**" >>$REPORT_FILE
+        echo "**Bug ID:** _${ID}_" >>$REPORT_FILE
         echo >>$REPORT_FILE
 
         if [[ -n $BUG_URL ]]; then
-            echo "Affected URL: [$BUG_URL](${BUG_URL})" >>$REPORT_FILE
+            echo "**Affected URL:** [$BUG_URL](${BUG_URL})" >>$REPORT_FILE
             echo >>$REPORT_FILE
         fi
 
