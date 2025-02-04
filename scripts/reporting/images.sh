@@ -41,8 +41,8 @@ function fetch_image() {
         -o "output/images/$ID.$FILE_TYPE"
 }
 
-# export -f fetch_image image_ext
-# parallel fetch_image ::: $IMAGES_B64
+export -f fetch_image image_ext
+parallel fetch_image ::: $IMAGES_B64
 
 IMAGE_BASE_DIR=$(basename "$IMAGE_DIR")
 grep -o -E "https://bugcrowd\.com/.*/attachments/.* " "$REPORT_FILE" | while IFS= read -r url; do
