@@ -10,15 +10,30 @@
 
 ## Examples
 
-### Fetching Submissions
+### Generating Report
+
+#### Select Targets
+
+When no UUID or target specified, the script will pull down all targets and allow the user to select which targets to use for the report.
+
+```bash
+op run --env-file=".env" -- ./scripts/reporting/generate.sh
+```
+
+#### By Targets
+
+Target can be specified with the `-t | --target` argument
 
 ```bash
 TARGETS='*.dds.mil,other.target.com'
-op run --env-file=".env" -- ./scripts/reporting/generate.sh $TARGETS
+op run --env-file=".env" -- ./scripts/reporting/generate.sh -t $TARGETS
 ```
 
-### Generating Report
+#### Single Submission
+
+A single submission can be pulled with the `-u | --uuid` argument
 
 ```bash
-./scripts/report.sh
+SUBMISSION_UUID="<uuid>"
+op run --env-file=".env" -- ./scripts/reporting/generate.sh -u $SUBMISSION_UUID
 ```
