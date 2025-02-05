@@ -1,6 +1,8 @@
 #! /usr/bin/env bash
 set -euo pipefail
 
+TARGETS=$(echo "$1" | tr ',' ', ')
+
 SUBMISSIONS_BY_STATE=$(jq '
     group_by(.attributes.state) |
     map({ 
@@ -19,18 +21,52 @@ function sanitize() {
         -e "s/#//g" \
         -e "s/---//g" \
         -e "s/~//g" \
-        -e 's/<\?s>//g'
+        -e 's/<\?s>//g' \
+        -e 's|```|\n```|g'
+}
+
+function severity_emoji() {
+    EMOJI=""
+    case "$1" in
+    1)
+        EMOJI="🔴"
+        ;;
+    2)
+        EMOJI="🟠"
+        ;;
+    3)
+        EMOJI="🟡"
+        ;;
+    4)
+        EMOJI="🟢"
+        ;;
+    5)
+        EMOJI="🔵"
+        ;;
+    *)
+        echo "No Emoji for $1"
+        exit 1
+        ;;
+    esac
+    echo -n "$EMOJI"
 }
 
 STATE_TYPES=("unresolved" "resolved" "informational")
+
+echo "# $TARGETS Report" >>$REPORT_FILE
+echo >>$REPORT_FILE
+
+echo "_Generated $(date "+%Y-%m-%d")_" >>$REPORT_FILE
+echo >>$REPORT_FILE
+
 echo '```table-of-contents
-title: 
-style: nestedList # TOC style (nestedList|nestedOrderedList|inlineFirstLevel)
-minLevel: 0 # Include headings from the specified level
-maxLevel: 0 # Include headings up to the specified level
-includeLinks: true # Make headings clickable
-hideWhenEmpty: false # Hide TOC if no headings are found
-debugInConsole: false # Print debug info in Obsidian console
+title: Table of Contents
+style: nestedList
+minLevel: 0
+maxLevel: 0
+includeLinks: true
+hideWhenEmpty: false
+debugInConsole: false
 ```' >>$REPORT_FILE
 echo >>$REPORT_FILE
 
@@ -52,8 +88,9 @@ for STATE in "${STATE_TYPES[@]}"; do
         DESCRIPTION=$(jq -r '.attributes.description' <<<"$ITEM")
         REMEDIATION_ADVICE=$(jq -r '.attributes.remediation_advice' <<<"$ITEM")
         VULNERABILITY_REFERENCE=$(jq -r '.attributes.vulnerability_references' <<<"$ITEM")
+        SEVERITY_EMOJI=$(severity_emoji $SEVERITY)
 
-        echo "### P${SEVERITY} - $(sanitize <<<${TITLE^})" >>$REPORT_FILE
+        echo "### $SEVERITY_EMOJI P${SEVERITY} - $(sanitize <<<${TITLE^})" >>$REPORT_FILE
         echo >>$REPORT_FILE
 
         echo "**Bug ID:** _${ID}_" >>$REPORT_FILE

@@ -24,7 +24,7 @@ echo "Fetching submissions for $TARGETS"
 echo "Done fetching submissions"
 
 echo "Generating initial report"
-./scripts/reporting/report.sh
+./scripts/reporting/report.sh "$TARGETS"
 echo "Done generating initial report"
 
 echo "Fetching image assets and replacing in report"
