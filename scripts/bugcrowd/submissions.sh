@@ -1,12 +1,12 @@
 #! /usr/bin/env bash
 set -euo pipefail
+TARGETS="${1:-}"
+UUID="${2:-}"
 
 HOST="https://api.bugcrowd.com"
 ENDPOINT="/submissions"
 PAGE=1
 NEXT=""
-TARGETS="${1:-''}"
-UUID="${2:-''}"
 
 mkdir -p "$DATA_DIR"
 rm -f $DATA_DIR/*.json
@@ -16,20 +16,28 @@ function urlencode() {
     sed -e 's/,/%2c/g' <<<"$1"
 }
 
+AUTH_PARAMS=(
+    -H "Accept: application/vnd.bugcrowd+json"
+    -H "Authorization: Token $BUGCROWD_USERNAME:$BUGCROWD_PASSWORD"
+    -H 'Bugcrowd-Version: 2024-08-15'
+)
+
+BASE_DATA_PARAMS=(
+    --data-urlencode 'fields[target]=name,category,organization'
+    --data-urlencode 'fields[submission]=title,description,state,target,bug_url,severity,file_attachments,remediation_advice,vulnerability_references'
+    --data-urlencode 'fields[file_attachment]=file_name,file_type,s3_signed_url,parent'
+    --data-urlencode 'include=file_attachments'
+)
+
+# For single submission
 if [[ -n $UUID ]]; then
-    UUID="/${UUID}"
+    ENDPOINT="${ENDPOINT}/${UUID}"
     PARAMS=(
-        --data-urlencode 'fields[target]=name,category,organization'
-        --data-urlencode 'fields[submission]=title,description,state,target,bug_url,severity,file_attachments,remediation_advice,vulnerability_references'
-        --data-urlencode 'fields[file_attachment]=file_name,file_type,s3_signed_url,parent'
-        --data-urlencode 'include=file_attachments'
+        "${BASE_DATA_PARAMS[@]}"
     )
-else
+else # For all submissions
     PARAMS=(
-        --data-urlencode 'fields[target]=name,category,organization'
-        --data-urlencode 'fields[submission]=title,description,state,target,bug_url,severity,file_attachment,remediation_advice,vulnerability_references'
-        --data-urlencode 'fields[file_attachment]=file_name,file_type,s3_signed_url,parent'
-        --data-urlencode 'include=file_attachment'
+        "${BASE_DATA_PARAMS[@]}"
         --data-urlencode 'filter[state]=unresolved,resolved,informational'
         --data-urlencode "filter[target]=$TARGETS"
         --data-urlencode 'sort=severity-asc,submitted-asc'
@@ -41,18 +49,16 @@ while true; do
     echo "Fetching page $PAGE"
     if [[ -n $NEXT ]]; then
         # --globoff needed to ignore "[]" in query params
-        RESP=$(curl -s --get --globoff --fail \
-            --url "${HOST}${ENDPOINT}?${NEXT}" \
-            -H "Accept: application/vnd.bugcrowd+json" \
-            -H "Authorization: Token $BUGCROWD_USERNAME:$BUGCROWD_PASSWORD" \
-            -H 'Bugcrowd-Version: 2024-08-15')
+        RESP=$(
+            curl -s --get --globoff --fail \
+                --url "${HOST}${ENDPOINT}?${NEXT}" \
+                "${AUTH_PARAMS[@]}"
+        )
     else
         RESP=$(
             curl -s --get --fail \
-                --url "${HOST}${ENDPOINT}${UUID}" \
-                -H "Accept: application/vnd.bugcrowd+json" \
-                -H "Authorization: Token $BUGCROWD_USERNAME:$BUGCROWD_PASSWORD" \
-                -H 'Bugcrowd-Version: 2024-08-15' \
+                --url "${HOST}${ENDPOINT}" \
+                "${AUTH_PARAMS[@]}" \
                 "${PARAMS[@]}"
         )
     fi
