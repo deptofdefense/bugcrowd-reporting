@@ -5,8 +5,7 @@
 2. Add credential into 1Password > Employee Vault. Name it `Bugcrowd API`
     - Add username under `username` field in 1Password
     - Add password under `credential` field in 1Password
-3. Run [Submissions Script](#fetching-submissions)
-4. Run [Report Script](#generating-report)
+3. Run [Report Script](#generating-report)
 
 ## Examples
 
