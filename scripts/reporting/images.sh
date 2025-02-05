@@ -12,6 +12,11 @@ IMAGES=$(jq -s '
     | add
 ' $DATA_DIR/[0-9][0-9][0-9].json)
 
+if [[ "$IMAGES" == "null" ]]; then
+    echo "No images to fetch."
+    exit 0
+fi
+
 IMAGES_B64=$(
     jq -r '
         to_entries |
