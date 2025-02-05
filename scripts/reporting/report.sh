@@ -2,6 +2,7 @@
 set -euo pipefail
 
 TARGETS=$(echo "$1" | tr ',' ', ')
+UUID="$2"
 
 SUBMISSIONS_BY_STATE=$(jq '
     group_by(.attributes.state) |
@@ -59,16 +60,18 @@ echo >>$REPORT_FILE
 echo "_Generated $(date "+%Y-%m-%d")_" >>$REPORT_FILE
 echo >>$REPORT_FILE
 
-echo '```table-of-contents
-title: Table of Contents
-style: nestedList
-minLevel: 0
-maxLevel: 0
-includeLinks: true
-hideWhenEmpty: false
-debugInConsole: false
-```' >>$REPORT_FILE
-echo >>$REPORT_FILE
+if [[ -z "$UUID" ]]; then
+    echo '```table-of-contents
+    title: Table of Contents
+    style: nestedList
+    minLevel: 0
+    maxLevel: 0
+    includeLinks: true
+    hideWhenEmpty: false
+    debugInConsole: false
+    ```' >>$REPORT_FILE
+    echo >>$REPORT_FILE
+fi
 
 for STATE in "${STATE_TYPES[@]}"; do
 
