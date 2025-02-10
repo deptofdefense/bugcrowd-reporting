@@ -62,15 +62,15 @@ parse_params() {
     done
 
     if [[ ${#_STATES[@]} -gt 0 ]]; then
-        STATES=$(echo "${_STATES[@]}" | tr ' ' ',')
+        STATES=$(tr ' ' ',' <<<"${_STATES[@]}")
     fi
 
     if [[ ${#_TARGETS[@]} -gt 0 ]]; then
-        TARGETS=$(echo "${_TARGETS[@]}" | tr ' ' ',')
+        TARGETS=$(tr ' ' ',' <<<"${_TARGETS[@]}")
     fi
 
     if [[ ${#_UUIDS[@]} -gt 0 ]]; then
-        UUIDS=$(echo "${_UUIDS[@]}" | tr ' ' ',')
+        UUIDS=$(tr ' ' ',' <<<"${_UUIDS[@]}")
     fi
 
     return 0

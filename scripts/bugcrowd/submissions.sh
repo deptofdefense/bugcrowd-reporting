@@ -6,6 +6,7 @@ STATES="${2:-}"
 UUIDS="${3:-}"
 
 export ENDPOINT="/submissions"
+export DATA_DIR="data${ENDPOINT}"
 export PARAMS=(
     --data-urlencode 'fields[target]=name,category,organization'
     --data-urlencode 'fields[submission]=title,description,state,target,bug_url,severity,file_attachments,remediation_advice,vulnerability_references'
