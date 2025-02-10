@@ -3,7 +3,7 @@ set -euo pipefail
 
 TARGETS="${1:-}"
 STATES="${2:-}"
-UUIDS=$"${3:-}"
+UUIDS="${3:-}"
 
 export ENDPOINT="/submissions"
 export PARAMS=(

@@ -68,7 +68,6 @@ function fetch_all() {
 }
 
 function concatenate_data() {
-
     echo "Concatenating all data"
     jq -s '[.[].data] | flatten' $DATA_DIR/*.json >"$DATA_DIR/all.json"
 }
