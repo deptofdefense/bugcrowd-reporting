@@ -21,18 +21,25 @@ op run --env-file=".env" -- ./scripts/reporting/generate.sh
 
 #### By Targets
 
-Target can be specified with the `-t | --target` argument
+Targets can be specified with the `-t | --target` argument
+You can also filter the targets by their state with the `-s | --state` argument.
 
 ```bash
-TARGETS='*.dds.mil,other.target.com'
-op run --env-file=".env" -- ./scripts/reporting/generate.sh -t $TARGETS
+op run --env-file=".env" -- \
+    ./scripts/reporting/generate.sh \
+        -t '*.dds.mil' \
+        -t 'other.target.com' \
+        -s 'unresolved' \
+        -s 'informational'
 ```
 
-#### Single Submission
+#### Submissions by UUID
 
-A single submission can be pulled with the `-u | --uuid` argument
+Single submissions can be pulled with their UUID using the `-u | --uuid` argument
 
 ```bash
-SUBMISSION_UUID="<uuid>"
-op run --env-file=".env" -- ./scripts/reporting/generate.sh -u $SUBMISSION_UUID
+op run --env-file=".env" -- \
+    ./scripts/reporting/generate.sh \
+        -u "uuid1" \
+        -u "uuid2"
 ```
