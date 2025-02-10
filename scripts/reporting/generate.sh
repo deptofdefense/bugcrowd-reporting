@@ -13,7 +13,8 @@ Available options:
 -h, --help      Print this help and exit
 -v, --verbose   Print script debug info
 -u, --uuid      Submission UUID to capture
--t, --targets   Targets to generate a report on
+-t, --target    Target to generate a report on
+-s, --state     Submission states to filter by (default: unresolved,resolved,informational)
 EOF
     exit
 }
@@ -30,19 +31,28 @@ die() {
 }
 
 parse_params() {
+    _TARGETS=()
+    _UUIDS=()
+    _STATES=()
+
     TARGETS=''
-    UUIDS=()
+    UUIDS=''
+    STATES="unresolved,resolved,informational"
 
     while :; do
         case "${1-}" in
         -h | --help) usage ;;
         -v | --verbose) set -x ;;
-        -t | --targets)
-            TARGETS="${2-}"
+        -t | --target)
+            _TARGETS+=("${2-}")
             shift
             ;;
         -u | --uuid)
-            UUIDS+=("${2-}")
+            _UUIDS+=("${2-}")
+            shift
+            ;;
+        -s | --state)
+            _STATES+=("${2-}")
             shift
             ;;
         -?*) die "Unknown option: $1" ;;
@@ -51,17 +61,24 @@ parse_params() {
         shift
     done
 
-    # args=("$@")
-    # # check required params and arguments
-    # [[ -z "${param-}" ]] && die "Missing required parameter: param"
-    # [[ ${#args[@]} -eq 0 ]] && die "Missing script arguments"
+    if [[ ${#_STATES[@]} -gt 0 ]]; then
+        STATES=$(echo "${_STATES[@]}" | tr ' ' ',')
+    fi
+
+    if [[ ${#_TARGETS[@]} -gt 0 ]]; then
+        TARGETS=$(echo "${_TARGETS[@]}" | tr ' ' ',')
+    fi
+
+    if [[ ${#_UUIDS[@]} -gt 0 ]]; then
+        UUIDS=$(echo "${_UUIDS[@]}" | tr ' ' ',')
+    fi
 
     return 0
 }
 
 parse_params "$@"
 
-if [[ -z $TARGETS && ${#UUIDS[@]} -eq 0 ]]; then
+if [[ -z $TARGETS && -z $UUIDS ]]; then
     if [[ ! -f data/targets/all.json ]]; then
         msg "Fetching targets"
         ./scripts/bugcrowd/targets.sh
@@ -77,8 +94,8 @@ if [[ -z $TARGETS && ${#UUIDS[@]} -eq 0 ]]; then
     )
 fi
 
-msg "Fetching submission(s) for $TARGETS ${UUIDS[*]}"
-./scripts/bugcrowd/submissions.sh "$TARGETS" "${UUIDS[@]}"
+msg "Fetching $STATES submission(s) for $TARGETS $UUIDS"
+./scripts/bugcrowd/submissions.sh "$TARGETS" "$STATES" "$UUIDS"
 msg "Done fetching submission(s)"
 
 msg "Generating initial report"

@@ -2,14 +2,10 @@
 set -euo pipefail
 
 TARGETS="${1:-}"
-shift
+STATES="${2:-}"
+UUIDS=$"${3:-}"
 
 export ENDPOINT="/submissions"
-ENDPOINTS=()
-for UUID in "$@"; do
-    ENDPOINTS+=("$ENDPOINT/$UUID")
-done
-
 export PARAMS=(
     --data-urlencode 'fields[target]=name,category,organization'
     --data-urlencode 'fields[submission]=title,description,state,target,bug_url,severity,file_attachments,remediation_advice,vulnerability_references'
@@ -22,13 +18,19 @@ export PARAMS=(
 setup
 
 # For specified submissions by uuid
-if [ ${#ENDPOINTS[@]} -gt 0 ]; then
+if [ -n "$UUIDS" ]; then
+    ENDPOINTS=$(
+        tr ',' ' ' <<<"$UUIDS" |
+            sed \
+                -e "s|^|$ENDPOINT/|g" \
+                -e "s| | $ENDPOINT/|g"
+    )
     . env_parallel.bash # Allow for PARAMS to be exported
-    env_parallel fetch ::: "${ENDPOINTS[@]}"
+    env_parallel fetch ::: $ENDPOINTS
 else # For all submissions
     export PARAMS=(
         "${PARAMS[@]}"
-        --data-urlencode 'filter[state]=unresolved,resolved,informational'
+        --data-urlencode "filter[state]=$STATES"
         --data-urlencode "filter[target]=$TARGETS"
         --data-urlencode 'sort=severity-asc,submitted-asc'
         --data-urlencode 'page[limit]=25'
