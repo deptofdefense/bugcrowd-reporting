@@ -31,7 +31,7 @@ die() {
 
 parse_params() {
     TARGETS=''
-    UUID=''
+    UUIDS=()
 
     while :; do
         case "${1-}" in
@@ -42,7 +42,7 @@ parse_params() {
             shift
             ;;
         -u | --uuid)
-            UUID="${2-}"
+            UUIDS+=("${2-}")
             shift
             ;;
         -?*) die "Unknown option: $1" ;;
@@ -61,11 +61,11 @@ parse_params() {
 
 parse_params "$@"
 
-if [[ -z $TARGETS && -z $UUID ]]; then
+if [[ -z $TARGETS && ${#UUIDS[@]} -eq 0 ]]; then
     if [[ ! -f data/targets/all.json ]]; then
-        echo "Fetching targets"
+        msg "Fetching targets"
         ./scripts/bugcrowd/targets.sh
-        echo "Done fetching targets"
+        msg "Done fetching targets"
     fi
 
     TARGETS=$(
@@ -77,16 +77,16 @@ if [[ -z $TARGETS && -z $UUID ]]; then
     )
 fi
 
-echo "Fetching submission(s) for $TARGETS $UUID"
-./scripts/bugcrowd/submissions.sh "$TARGETS" "$UUID"
-echo "Done fetching submission(s)"
+msg "Fetching submission(s) for $TARGETS ${UUIDS[*]}"
+./scripts/bugcrowd/submissions.sh "$TARGETS" "${UUIDS[@]}"
+msg "Done fetching submission(s)"
 
-echo "Generating initial report"
-./scripts/reporting/report.sh "$TARGETS" "$UUID"
-echo "Done generating initial report"
+msg "Generating initial report"
+./scripts/reporting/report.sh "$TARGETS"
+msg "Done generating initial report"
 
-echo "Fetching image assets and replacing in report"
-./scripts/reporting/images.sh "$TARGETS" "$UUID"
-echo "Done image assets"
+msg "Fetching image assets and replacing in report"
+./scripts/reporting/images.sh "$TARGETS"
+msg "Done image assets"
 
-echo "Report is finalized"
+msg "Report is finalized"

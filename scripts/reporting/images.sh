@@ -1,5 +1,6 @@
 #! /usr/bin/env bash
 set -euo pipefail
+shopt -s extglob
 
 IMAGES=$(jq -s '
     [ .[].included ]
@@ -10,7 +11,7 @@ IMAGES=$(jq -s '
     ]
     | map({(.id): {id: .id, s3_signed_url: .attributes.s3_signed_url, file_name: .attributes.file_name, file_type: .attributes.file_type }})
     | add
-' $DATA_DIR/[0-9][0-9][0-9].json)
+' $DATA_DIR/!(all.json))
 
 if [[ "$IMAGES" == "null" ]]; then
     echo "No images to fetch."
