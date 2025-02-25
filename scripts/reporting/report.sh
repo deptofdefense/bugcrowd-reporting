@@ -51,7 +51,7 @@ function severity_emoji() {
     echo -n "$EMOJI"
 }
 
-STATE_TYPES=("unresolved" "resolved" "informational")
+STATE_TYPES=("unresolved" "resolved" "informational" "new")
 
 echo "# $TARGETS Report" >>$REPORT_FILE
 echo >>$REPORT_FILE
