@@ -15,6 +15,7 @@ Available options:
 -u, --uuid      Submission UUID to capture
 -t, --target    Target to generate a report on
 -s, --state     Submission states to filter by (default: unresolved,resolved,informational)
+-p, --severity  Submission severities to filter by (default: 1,2,3,4,5)
 EOF
     exit
 }
@@ -34,10 +35,12 @@ parse_params() {
     _TARGETS=()
     _UUIDS=()
     _STATES=()
+    _SEVERITIES=()
 
     TARGETS=''
     UUIDS=''
     STATES="unresolved,resolved,informational"
+    SEVERITIES="1,2,3,4,5"
 
     while :; do
         case "${1-}" in
@@ -53,6 +56,10 @@ parse_params() {
             ;;
         -s | --state)
             _STATES+=("${2-}")
+            shift
+            ;;
+        -p | --severity)
+            _SEVERITIES+=("${2-}")
             shift
             ;;
         -?*) die "Unknown option: $1" ;;
@@ -71,6 +78,10 @@ parse_params() {
 
     if [[ ${#_UUIDS[@]} -gt 0 ]]; then
         UUIDS=$(tr ' ' ',' <<<"${_UUIDS[@]}")
+    fi
+
+    if [[ ${#_SEVERITIES[@]} -gt 0 ]]; then
+        SEVERITIES=$(tr ' ' ',' <<<"${_SEVERITIES[@]}")
     fi
 
     return 0
@@ -95,7 +106,7 @@ if [[ -z $TARGETS && -z $UUIDS ]]; then
 fi
 
 msg "Fetching $STATES submission(s) for $TARGETS $UUIDS"
-./scripts/bugcrowd/submissions.sh "$TARGETS" "$STATES" "$UUIDS"
+./scripts/bugcrowd/submissions.sh "$TARGETS" "$STATES" "$UUIDS" "$SEVERITIES"
 msg "Done fetching submission(s)"
 
 msg "Generating initial report"

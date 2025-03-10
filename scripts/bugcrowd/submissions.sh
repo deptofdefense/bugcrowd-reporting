@@ -4,6 +4,7 @@ set -euo pipefail
 TARGETS="${1:-}"
 STATES="${2:-}"
 UUIDS="${3:-}"
+SEVERITIES="${4:-1,2,3,4,5}"
 
 export ENDPOINT="/submissions"
 export DATA_DIR="data${ENDPOINT}"
@@ -33,6 +34,7 @@ else # For all submissions
         "${PARAMS[@]}"
         --data-urlencode "filter[state]=$STATES"
         --data-urlencode "filter[target]=$TARGETS"
+        --data-urlencode "filter[severity]=$SEVERITIES"
         --data-urlencode 'sort=severity-asc,submitted-asc'
         --data-urlencode 'page[limit]=25'
     )

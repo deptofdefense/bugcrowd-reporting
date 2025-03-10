@@ -14,6 +14,7 @@ Available options:
 -v, --verbose   Print script debug info
 -t, --target    Target to generate a report on
 -s, --state     Submission states to filter by (default: unresolved,resolved,informational)
+-p, --severity  Submission severities to filter by (default: 1,2,3,4,5)
 --from          From date in format YYYY-MM-DD (default: 1 week ago)
 --to            To date in format YYYY-MM-DD (default: today)
 --skip-fetch    Skip fetching submissions
@@ -35,9 +36,11 @@ die() {
 parse_params() {
     _TARGETS=()
     _STATES=()
+    _SEVERITIES=()
 
     TARGETS=''
     STATES="new,out-of-scope,not-applicable,not-reproducible,triaged,unresolved,resolved,informational"
+    SEVERITIES="1,2,3,4,5"
     FROM=""
     TO=""
     SKIP_FETCH=false
@@ -56,6 +59,10 @@ parse_params() {
             ;;
         -s | --state)
             _STATES+=("${2-}")
+            shift
+            ;;
+        -p | --severity)
+            _SEVERITIES+=("${2-}")
             shift
             ;;
         --from)
@@ -81,6 +88,9 @@ parse_params() {
 
     if [[ ${#_TARGETS[@]} -gt 0 ]]; then
         TARGETS=$(tr ' ' ',' <<<"${_TARGETS[@]}")
+    fi
+    if [[ ${#_SEVERITIES[@]} -gt 0 ]]; then
+        SEVERITIES=$(tr ' ' ',' <<<"${_SEVERITIES[@]}")
     fi
 
     [[ -z $TO ]] && TO=$(date -u -d "today" +"%Y-%m-%d")
@@ -109,7 +119,7 @@ fi
 
 if [[ $SKIP_FETCH == false || ! -f $DATA_DIR/all.json ]]; then
     msg "Fetching $STATES submission(s) for $TARGETS"
-    ./scripts/bugcrowd/submissions.sh "$TARGETS" "$STATES" ""
+    ./scripts/bugcrowd/submissions.sh "$TARGETS" "$STATES" "" "$SEVERITIES"
     msg "Done fetching submission(s)"
 fi
 
