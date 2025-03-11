@@ -40,7 +40,7 @@ parse_params() {
     TARGETS=''
     UUIDS=''
     STATES="unresolved,resolved,informational"
-    SEVERITIES="1,2,3,4,5"
+    SEVERITIES=""
 
     while :; do
         case "${1-}" in

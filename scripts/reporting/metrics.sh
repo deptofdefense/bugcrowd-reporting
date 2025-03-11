@@ -40,7 +40,7 @@ parse_params() {
 
     TARGETS=''
     STATES="new,out-of-scope,not-applicable,not-reproducible,triaged,unresolved,resolved,informational"
-    SEVERITIES="1,2,3,4,5"
+    SEVERITIES=""
     FROM=""
     TO=""
     SKIP_FETCH=false
