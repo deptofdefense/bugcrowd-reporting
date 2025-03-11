@@ -18,6 +18,8 @@ mkShell {
   packages = [
     fzf
     jq
+    parallel
+    miller
     (python312.withPackages (pythonPackages: [
 
     ]))
