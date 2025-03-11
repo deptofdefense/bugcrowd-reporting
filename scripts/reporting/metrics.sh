@@ -129,34 +129,80 @@ else
     msg "Generating metrics from $FROM to $TO for targets: $TARGETS"
 fi
 
-SUBMISSION_COUNTS=$(
+TARGETS_BY_ID=$(
+    jq '[.[] | {(.id): .attributes.name }] | add' data/targets/all.json
+)
+
+SUBMISSION_COUNTS_CURRENT=$(
     jq \
         --arg to "$TO" \
         --arg from "$FROM" \
+        --argjson targets "$TARGETS_BY_ID" \
         '
-            [.[].attributes]
-            | {
-                total_submitted:
-                    map(select(.submitted_at >= $from and .submitted_at <= $to)) | length,
-                new:
-                    map(select(.state == "new")) | length,
-                not_applicable:
-                    map(select(.state == "not-applicable" and .last_transitioned_to_not_applicable_at >= $from and .last_transitioned_to_not_applicable_at <= $to)) | length,
-                not_reproducible:
-                    map(select(.state == "not-reproducible" and .last_transitioned_to_not_reproducible_at >= $from and .last_transitioned_to_not_reproducible_at <= $to)) | length,
-                out_of_scope:
-                    map(select(.state == "out-of-scope" and .last_transitioned_to_out_of_scope_at >= $from and .last_transitioned_to_out_of_scope_at <= $to)) | length,
-                triaged:
-                    map(select(.last_transitioned_to_triaged_at >= $from and .last_transitioned_to_triaged_at <= $to)) | length,
-                informational:
-                    map(select(.state == "informational" and .last_transitioned_to_informational_at >= $from and .last_transitioned_to_informational_at <= $to)) | length,
-                unresolved:
-                    map(select(.state == "unresolved" and .last_transitioned_to_unresolved_at >= $from and .last_transitioned_to_unresolved_at <= $to)) | length,
-                resolved:
-                    map(select(.state == "resolved" and .last_transitioned_to_resolved_at >= $from and .last_transitioned_to_resolved_at <= $to)) | length,
-            }
-            
+            group_by(.relationships.target.data.id) |
+            map(
+                [ .[] | (.attributes + { target: $targets[.relationships.target.data.id] }) ] |
+                {
+                    target: .[0].target,
+                    total_submitted:
+                        map(select(.submitted_at >= $from and .submitted_at <= $to)) | length,
+                    new:
+                        map(select(.state == "new" and .submitted_at >= $from and .submitted_at <= $to)) | length,
+                    not_applicable:
+                        map(select(.state == "not_applicable" and .last_transitioned_to_not_applicable_at >= $from and .last_transitioned_to_not_applicable_at <= $to)) | length,
+                    not_reproducible:
+                        map(select(.state == "not_reproducible" and .last_transitioned_to_not_reproducible_at >= $from and .last_transitioned_to_not_reproducible_at <= $to)) | length,
+                    out_of_scope:
+                        map(select(.state == "out_of_scope" and .last_transitioned_to_out_of_scope_at >= $from and .last_transitioned_to_out_of_scope_at <= $to)) | length,
+                    triaged:
+                        map(select(.state == "triaged" and .last_transitioned_to_triaged_at >= $from and .last_transitioned_to_triaged_at <= $to)) | length,
+                    informational:
+                        map(select(.state == "informational" and .last_transitioned_to_informational_at >= $from and .last_transitioned_to_informational_at <= $to)) | length,
+                    unresolved:
+                        map(select(.state == "unresolved" and .last_transitioned_to_unresolved_at >= $from and .last_transitioned_to_unresolved_at <= $to)) | length,
+                    resolved:
+                        map(select(.state == "resolved" and .last_transitioned_to_resolved_at >= $from and .last_transitioned_to_resolved_at <= $to)) | length,
+                }
+            )
         ' $DATA_DIR/all.json
 )
 
-mlr --ijson --opprint --barred cat <<<"$SUBMISSION_COUNTS"
+echo
+echo "Metrics for targets based on current state"
+mlr --ijson --opprint --barred cat <<<"$SUBMISSION_COUNTS_CURRENT"
+
+SUBMISSION_COUNTS_BY_TRANSITION=$(
+    jq \
+        --arg to "$TO" \
+        --arg from "$FROM" \
+        --argjson targets "$TARGETS_BY_ID" \
+        '
+            group_by(.relationships.target.data.id) |
+            map(
+                [ .[] | (.attributes + { target: $targets[.relationships.target.data.id] }) ] |
+                {
+                    target: .[0].target,
+                    total_submitted:
+                        map(select(.submitted_at >= $from and .submitted_at <= $to)) | length,
+                    not_applicable:
+                        map(select(.last_transitioned_to_not_applicable_at >= $from and .last_transitioned_to_not_applicable_at <= $to)) | length,
+                    not_reproducible:
+                        map(select(.last_transitioned_to_not_reproducible_at >= $from and .last_transitioned_to_not_reproducible_at <= $to)) | length,
+                    out_of_scope:
+                        map(select(.last_transitioned_to_out_of_scope_at >= $from and .last_transitioned_to_out_of_scope_at <= $to)) | length,
+                    triaged:
+                        map(select(.last_transitioned_to_triaged_at >= $from and .last_transitioned_to_triaged_at <= $to)) | length,
+                    informational:
+                        map(select(.last_transitioned_to_informational_at >= $from and .last_transitioned_to_informational_at <= $to)) | length,
+                    unresolved:
+                        map(select(.last_transitioned_to_unresolved_at >= $from and .last_transitioned_to_unresolved_at <= $to)) | length,
+                    resolved:
+                        map(select(.last_transitioned_to_resolved_at >= $from and .last_transitioned_to_resolved_at <= $to)) | length,
+                }
+            )
+        ' $DATA_DIR/all.json
+)
+
+echo
+echo "Metrics for targets based on their transitions within date range"
+mlr --ijson --opprint --barred cat <<<"$SUBMISSION_COUNTS_BY_TRANSITION"
