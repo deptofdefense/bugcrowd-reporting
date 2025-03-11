@@ -1,8 +1,26 @@
 
 ## Setup
 
+### Dependencies
+
+```bash
+brew install miller fzf jq parallel
+```
+
+### 1Password
+
+In 1Password, enable `Settings` > `Developer` > `Integrate with 1Password CLI`
+
+In a terminal run the following to log in with your DDS account.
+
+```bash
+op signin
+```
+
+### API Key
+
 1. Create a [Bugcrowd API Key](https://tracker.bugcrowd.com/user/api_credentials)
-2. Add credential into 1Password > Employee Vault. Name it `Bugcrowd API`
+2. Add credential into 1Password (API Credentials type) > Employee Vault. Name it `Bugcrowd API`
     - Add username under `username` field in 1Password
     - Add password under `credential` field in 1Password
 3. Run [Report Script](#generating-report)
@@ -42,4 +60,11 @@ op run --env-file=".env" -- \
     ./scripts/reporting/generate.sh \
         -u "uuid1" \
         -u "uuid2"
+```
+
+### Metrics
+
+```bash
+op run --env-file=".env" -- \
+    ./scripts/reporting/metrics.sh
 ```
