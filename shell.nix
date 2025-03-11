@@ -3,16 +3,11 @@
 }:
 with pkgs;
 mkShell {
-  buildInputs = [
-    python312Packages.virtualenv
-  ];
+  buildInputs = [ ];
 
   shellHook = ''
-    [[ ! -d .venv ]] && python -m venv .venv
-    source .venv/bin/activate
-    if [[ -f requirements.txt ]]; then
-      pip install -r requirements.txt --require-virtualenv
-    fi
+    # Use Mac's sed
+    alias sed=/usr/bin/sed
   '';
 
   packages = [
@@ -20,8 +15,5 @@ mkShell {
     jq
     parallel
     miller
-    (python312.withPackages (pythonPackages: [
-
-    ]))
   ];
 }
