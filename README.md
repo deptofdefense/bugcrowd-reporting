@@ -4,12 +4,12 @@
 ### Dependencies
 
 ```bash
-brew install miller fzf jq parallel
+brew install 1password-cli miller fzf jq parallel
 ```
 
 ### 1Password
 
-In 1Password, enable `Settings` > `Developer` > `Integrate with 1Password CLI`
+In [1Password](https://developer.1password.com/docs/cli/get-started/), enable `Settings` > `Developer` > `Integrate with 1Password CLI`
 
 In a terminal run the following to log in with your DDS account.
 
