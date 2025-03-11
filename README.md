@@ -64,6 +64,8 @@ op run --env-file=".env" -- \
 
 ### Metrics
 
+Fetch metrics for a given date range
+
 ```bash
 op run --env-file=".env" -- \
     ./scripts/reporting/metrics.sh \

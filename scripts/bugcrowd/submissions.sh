@@ -12,7 +12,7 @@ export PARAMS=(
     --data-urlencode 'fields[target]=name,category,organization'
     --data-urlencode 'fields[submission]=title,description,state,target,bug_url,severity,file_attachments,remediation_advice,vulnerability_references,last_transitioned_to_informational_at,last_transitioned_to_not_applicable_at,last_transitioned_to_not_reproducible_at,last_transitioned_to_out_of_scope_at,last_transitioned_to_resolved_at,last_transitioned_to_triaged_at,last_transitioned_to_unresolved_at,submitted_at'
     --data-urlencode 'fields[file_attachment]=file_name,file_type,s3_signed_url,parent'
-    --data-urlencode 'include=file_attachments'
+    --data-urlencode 'include=file_attachments,target'
 )
 
 . ./scripts/bugcrowd/api.sh
@@ -42,7 +42,6 @@ else # For all submissions
             --data-urlencode "filter[severity]=$SEVERITIES"
         )
     fi
-    echo "${PARAMS[@]}"
     fetch_all
 fi
 
