@@ -62,7 +62,7 @@ function fetch_all() {
 
         NEXT=$(jq -r '.links.next' <<<"$RESP" | sed "s/\\${ENDPOINT}?//")
         NEXT=$(urlencode "$NEXT")
-        jq . <<<"$RESP" >"$DATA_DIR/$(printf "%03d\n" $PAGE).json"
+        jq . <<<"$RESP" >"$DATA_DIR/$(printf "%03d" $PAGE).json"
         PAGE=$((PAGE + 1))
     done
 }
