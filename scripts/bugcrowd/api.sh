@@ -6,7 +6,7 @@ export HOST="https://api.bugcrowd.com"
 export AUTH_PARAMS=(
     -H "Accept: application/vnd.bugcrowd+json"
     -H "Authorization: Token $BUGCROWD_USERNAME:$BUGCROWD_PASSWORD"
-    -H 'Bugcrowd-Version: 2024-08-15'
+    -H 'Bugcrowd-Version: 2025-02-25'
 )
 
 function setup() {
