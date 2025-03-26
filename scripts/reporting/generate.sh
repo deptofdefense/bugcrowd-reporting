@@ -110,7 +110,7 @@ msg "Fetching $STATES submission(s) for $TARGETS $UUIDS"
 msg "Done fetching submission(s)"
 
 msg "Generating initial report"
-./scripts/reporting/report.sh "$TARGETS"
+./scripts/reporting/report.sh "$TARGETS" "$STATES"
 msg "Done generating initial report"
 
 msg "Fetching image assets and replacing in report"

@@ -2,6 +2,7 @@
 set -euo pipefail
 
 TARGETS=$(echo "$1" | tr ',' ', ')
+STATE_TYPES=$(echo "$2" | tr ',' ' ')
 
 SUBMISSIONS_BY_STATE=$(jq '
     group_by(.attributes.state) |
@@ -44,14 +45,12 @@ function severity_emoji() {
         EMOJI="🔵"
         ;;
     *)
-        echo "No Emoji for $1"
+        echo "No Emoji"
         exit 1
         ;;
     esac
     echo -n "$EMOJI"
 }
-
-STATE_TYPES=("unresolved" "resolved" "informational" "new")
 
 echo "# $TARGETS Report" >>$REPORT_FILE
 echo >>$REPORT_FILE
@@ -63,15 +62,14 @@ echo '```table-of-contents
 title: Table of Contents
 style: nestedList
 minLevel: 0
-maxLevel: 0
+maxLevel: 3
 includeLinks: true
 hideWhenEmpty: false
 debugInConsole: false
 ```' >>$REPORT_FILE
 echo >>$REPORT_FILE
 
-for STATE in "${STATE_TYPES[@]}"; do
-
+for STATE in $STATE_TYPES; do
     if [[ "$(jq -r --arg state $STATE '.[$state]? == null' <<<$SUBMISSIONS_BY_STATE)" == "true" ]]; then
         continue
     fi
@@ -101,15 +99,15 @@ for STATE in "${STATE_TYPES[@]}"; do
             echo >>$REPORT_FILE
         fi
 
-        echo "#### Description" >>$REPORT_FILE
+        echo "#### Description ^$ID-description" >>$REPORT_FILE
         echo "$DESCRIPTION" | sanitize >>$REPORT_FILE
         echo >>$REPORT_FILE
 
-        echo "#### Remediation Advice" >>$REPORT_FILE
+        echo "#### Remediation Advice ^$ID-remediation" >>$REPORT_FILE
         echo "$REMEDIATION_ADVICE" | sanitize >>$REPORT_FILE
         echo >>$REPORT_FILE
 
-        echo "#### References" >>$REPORT_FILE
+        echo "#### References ^$ID-references" >>$REPORT_FILE
         echo "$VULNERABILITY_REFERENCE" | sanitize >>$REPORT_FILE
         echo >>$REPORT_FILE
 
