@@ -69,7 +69,7 @@ function fetch_all() {
 
 function concatenate_data() {
     echo "Concatenating all data"
-    jq -s '[.[].data] | flatten' $DATA_DIR/*.json >"$DATA_DIR/all.json"
+    jq -s '[.[].data] | flatten | sort_by(.attributes.severity)' $DATA_DIR/*.json >"$DATA_DIR/all.json"
 }
 
 export -f setup fetch_all fetch concatenate_data
