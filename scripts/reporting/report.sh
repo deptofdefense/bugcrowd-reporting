@@ -52,6 +52,14 @@ function severity_emoji() {
     echo -n "$EMOJI"
 }
 
+function format_date() {
+    if [[ "$1" == "null" ]]; then
+        echo ""
+        return
+    fi
+    date -u -d "$1" '+%Y-%m-%d %H:%M UTC'
+}
+
 echo "# $TARGETS Report" >>$REPORT_FILE
 echo >>$REPORT_FILE
 
@@ -87,6 +95,8 @@ for STATE in $STATE_TYPES; do
         REMEDIATION_ADVICE=$(jq -r '.attributes.remediation_advice' <<<"$ITEM")
         VULNERABILITY_REFERENCE=$(jq -r '.attributes.vulnerability_references' <<<"$ITEM")
         SEVERITY_EMOJI=$(severity_emoji $SEVERITY)
+        SUBMITTED_AT=$(format_date "$(jq -r '.attributes.submitted_at' <<<"$ITEM")")
+        TRIAGED_AT=$(format_date "$(jq -r '.attributes.last_transitioned_to_triaged_at' <<<"$ITEM")")
 
         echo "### $SEVERITY_EMOJI P${SEVERITY} - $(sanitize <<<${TITLE^})" >>$REPORT_FILE
         echo >>$REPORT_FILE
@@ -96,6 +106,16 @@ for STATE in $STATE_TYPES; do
 
         if [[ -n $BUG_URL ]]; then
             echo "**Affected URL:** [$BUG_URL](${BUG_URL})" >>$REPORT_FILE
+            echo >>$REPORT_FILE
+        fi
+
+        if [[ -n $SUBMITTED_AT ]]; then
+            echo "**Submitted At:** _${SUBMITTED_AT}_" >>$REPORT_FILE
+            echo >>$REPORT_FILE
+        fi
+
+        if [[ -n $TRIAGED_AT ]]; then
+            echo "**Triaged At:** _${TRIAGED_AT}_" >>$REPORT_FILE
             echo >>$REPORT_FILE
         fi
 
