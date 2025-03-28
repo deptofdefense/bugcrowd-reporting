@@ -126,4 +126,8 @@ msg "Fetching image assets and replacing in report"
 ./scripts/reporting/images.sh "$TARGETS"
 msg "Done image assets"
 
-msg "Report is finalized"
+msg "Generating checklist"
+./scripts/reporting/checklist.sh
+msg "Done generating checklist"
+
+msg "Report and checklist are finalized"
