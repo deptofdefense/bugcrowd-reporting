@@ -62,6 +62,18 @@ op run --env-file=".env" -- \
         -u "uuid2"
 ```
 
+#### Priority and Custom Fields
+
+Fetching items by priority and incorporating custom fields into the report.
+
+```bash
+op run --env-file=".env" -- \
+    ./scripts/reporting/generate.sh \
+        -p 1 \
+        -p 2 \
+        -cf "Last Assessed"
+```
+
 ### Metrics
 
 Fetch metrics for a given date range

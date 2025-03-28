@@ -12,14 +12,14 @@ usage() {
 Usage: $(basename "${BASH_SOURCE[0]}") [-h] [-v] [-f] -u uuid arg1 [arg2...]
 Generate a vulnerability report based on a single submission or targets
 Available options:
--h, --help      Print this help and exit
--v, --verbose   Print script debug info
--u, --uuid      Submission UUID to capture
--t, --target    Target to generate a report on
--s, --state     Submission states to filter by (default: unresolved,resolved,informational)
--p, --severity  Submission severities to filter by (default: 1,2,3,4,5)
--cf             Custom field to output in report
---skip-fetch    Skip fetching submissions
+-h, --help              Print this help and exit
+-v, --verbose           Print script debug info
+-u, --uuid              Submission UUID to capture
+-t, --target            Target to generate a report on
+-s, --state             Submission states to filter by (default: unresolved,resolved,informational)
+-p, --severity          Submission severities to filter by (default: 1,2,3,4,5)
+-cf, --custom-field     Custom field to output in report
+--skip-fetch            Skip fetching submissions
 EOF
     exit
 }
