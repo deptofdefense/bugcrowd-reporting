@@ -1,8 +1,11 @@
 #! /usr/bin/env bash
 set -euo pipefail
 
-TARGETS=$(echo "$1" | tr ',' ', ')
-STATE_TYPES=$(echo "$2" | tr ',' ' ')
+. ./scripts/reporting/utils.sh
+
+TARGETS=$(from_params "$1")
+STATE_TYPES=$(from_params "$2")
+CUSTOM_FIELDS=$(from_params "$3")
 
 SUBMISSIONS_BY_STATE=$(jq '
     group_by(.attributes.state) |
@@ -60,7 +63,7 @@ function format_date() {
     date -u -d "$1" '+%Y-%m-%d %H:%M UTC'
 }
 
-echo "# $TARGETS Report" >>$REPORT_FILE
+echo "# ${TARGETS[*]// /, } Report" >>$REPORT_FILE
 echo >>$REPORT_FILE
 
 echo "_Generated $(date "+%Y-%m-%d")_" >>$REPORT_FILE
@@ -118,6 +121,15 @@ for STATE in $STATE_TYPES; do
             echo "**Triaged At:** _${TRIAGED_AT}_" >>$REPORT_FILE
             echo >>$REPORT_FILE
         fi
+
+        for CUSTOM_FIELD_PARAM in $CUSTOM_FIELDS; do
+            CUSTOM_FIELD=$(unparameterize "$CUSTOM_FIELD_PARAM")
+            CUSTOM_FIELD_VALUE=$(jq -r --arg field "$CUSTOM_FIELD" '.attributes.custom_fields?[$field]' <<<"$ITEM")
+            if [[ $CUSTOM_FIELD_VALUE != "null" ]]; then
+                echo "**$CUSTOM_FIELD:** _${CUSTOM_FIELD_VALUE}_" >>$REPORT_FILE
+                echo >>$REPORT_FILE
+            fi
+        done
 
         echo "#### Description ^$ID-description" >>$REPORT_FILE
         echo "$DESCRIPTION" | sanitize >>$REPORT_FILE

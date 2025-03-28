@@ -1,6 +1,8 @@
 #! /usr/bin/env bash
 set -euo pipefail
 
+. ./scripts/reporting/utils.sh
+
 export DATA_DIR="data/submissions"
 export REPORT_FILE="output/report.md"
 export IMAGE_DIR="output/images"
@@ -16,31 +18,24 @@ Available options:
 -t, --target    Target to generate a report on
 -s, --state     Submission states to filter by (default: unresolved,resolved,informational)
 -p, --severity  Submission severities to filter by (default: 1,2,3,4,5)
+-cf             Custom field to output in report
+--skip-fetch    Skip fetching submissions
 EOF
     exit
 }
-
-msg() {
-    echo >&2 -e "${1-}"
-}
-
-die() {
-    local msg=$1
-    local code=${2-1} # default exit status 1
-    msg "$msg"
-    exit "$code"
-}
-
 parse_params() {
     _TARGETS=()
     _UUIDS=()
     _STATES=()
     _SEVERITIES=()
+    _CUSTOM_FIELDS=()
+    SKIP_FETCH=''
 
     TARGETS=''
     UUIDS=''
     STATES="unresolved,resolved,informational"
     SEVERITIES=""
+    CUSTOM_FIELDS=''
 
     while :; do
         case "${1-}" in
@@ -62,6 +57,13 @@ parse_params() {
             _SEVERITIES+=("${2-}")
             shift
             ;;
+        -cf)
+            _CUSTOM_FIELDS+=("${2-}")
+            shift
+            ;;
+        --skip-fetch)
+            SKIP_FETCH=1
+            ;;
         -?*) die "Unknown option: $1" ;;
         *) break ;;
         esac
@@ -69,19 +71,22 @@ parse_params() {
     done
 
     if [[ ${#_STATES[@]} -gt 0 ]]; then
-        STATES=$(tr ' ' ',' <<<"${_STATES[@]}")
+        STATES=$(to_params "${_STATES[@]}")
     fi
 
     if [[ ${#_TARGETS[@]} -gt 0 ]]; then
-        TARGETS=$(tr ' ' ',' <<<"${_TARGETS[@]}")
+        TARGETS=$(to_params "${_TARGETS[@]}")
     fi
 
     if [[ ${#_UUIDS[@]} -gt 0 ]]; then
-        UUIDS=$(tr ' ' ',' <<<"${_UUIDS[@]}")
+        UUIDS=$(to_params "${_UUIDS[@]}")
     fi
 
     if [[ ${#_SEVERITIES[@]} -gt 0 ]]; then
-        SEVERITIES=$(tr ' ' ',' <<<"${_SEVERITIES[@]}")
+        SEVERITIES=$(to_params "${_SEVERITIES[@]}")
+    fi
+    if [[ ${#_CUSTOM_FIELDS[@]} -gt 0 ]]; then
+        CUSTOM_FIELDS=$(to_params "${_CUSTOM_FIELDS[@]}")
     fi
 
     return 0
@@ -105,12 +110,16 @@ if [[ -z $TARGETS && -z $UUIDS ]]; then
     )
 fi
 
-msg "Fetching $STATES submission(s) for $TARGETS $UUIDS"
-./scripts/bugcrowd/submissions.sh "$TARGETS" "$STATES" "$UUIDS" "$SEVERITIES"
-msg "Done fetching submission(s)"
+if [[ -n "$SKIP_FETCH" ]]; then
+    msg "Skipping fetch"
+else
+    msg "Fetching $STATES submission(s) for $TARGETS $UUIDS"
+    ./scripts/bugcrowd/submissions.sh "$TARGETS" "$STATES" "$UUIDS" "$SEVERITIES"
+    msg "Done fetching submission(s)"
+fi
 
 msg "Generating initial report"
-./scripts/reporting/report.sh "$TARGETS" "$STATES"
+./scripts/reporting/report.sh "$TARGETS" "$STATES" "$CUSTOM_FIELDS"
 msg "Done generating initial report"
 
 msg "Fetching image assets and replacing in report"
