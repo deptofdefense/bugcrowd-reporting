@@ -2,18 +2,18 @@
 set -euo pipefail
 
 function parameterize() {
-    local input="${*:-$(cat)}"
+    local input="${*:-$(cat -)}"
     echo "${input// /_}"
 }
 
 function unparameterize() {
-    local input="${*:-$(cat)}"
+    local input="${*:-$(cat -)}"
     echo "${input//_/ }"
 }
 
 function to_params() {
     local IFS=','
-    local input="${*:-$(cat)}"
+    local input="${*:-$(cat -)}"
     read -r -a array <<<"$input"
     local result=""
     for item in "${array[@]}"; do
@@ -24,7 +24,11 @@ function to_params() {
 
 function from_params() {
     local IFS=','
-    local input="${*:-$(cat)}"
+    if [[ -n "$1" ]]; then
+        local input="${*:-$(cat -)}"
+    else
+        local input="$1"
+    fi
     read -r -a array <<<"$input"
     echo "${array[@]}"
 }
