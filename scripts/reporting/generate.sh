@@ -114,6 +114,7 @@ if [[ -n "$SKIP_FETCH" ]]; then
     msg "Skipping fetch"
 else
     msg "Fetching $STATES submission(s) for $TARGETS $UUIDS"
+    mkdir -p "$DATA_DIR"
     ./scripts/bugcrowd/submissions.sh "$TARGETS" "$STATES" "$UUIDS" "$SEVERITIES"
     msg "Done fetching submission(s)"
 fi
@@ -123,6 +124,7 @@ msg "Generating initial report"
 msg "Done generating initial report"
 
 msg "Fetching image assets and replacing in report"
+mkdir -p "$IMAGE_DIR"
 ./scripts/reporting/images.sh "$TARGETS"
 msg "Done image assets"
 
